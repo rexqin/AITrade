@@ -23,7 +23,7 @@
       }
     }
   },
-  "postCreateCommand": "echo 'Dev container ready!'",
+  "postCreateCommand": "echo 'Dev container ready!' && python --version && node --version",
   "remoteUser": "root",
   "mounts": [
     "source=${localWorkspaceFolder}/datas,target=/workspaces/server/datas,type=bind,consistency=cached"

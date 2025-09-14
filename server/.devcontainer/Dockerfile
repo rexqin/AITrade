@@ -1,12 +1,17 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # 设置环境变量
 ENV PYTHON_VERSION=3.5.10
 ENV PYTHON_PREFIX=/usr/local
 # ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
+# 设置非交互式环境变量
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+
 # 更新包列表并安装系统依赖
 RUN apt-get update && apt-get install -y \
+    tzdata \
     # 基础工具
     bash \
     curl \
@@ -42,6 +47,12 @@ RUN apt-get update && apt-get install -y \
     # 其他依赖
     pkg-config \
     software-properties-common \
+    # Node.js依赖（用于Cursor Server）
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载并编译安装Python 3.5.10
@@ -54,12 +65,12 @@ RUN cd /tmp && \
     rm -f /usr/local/bin/pip3.5 /usr/local/bin/pip3 /usr/local/bin/pip && \
     # 配置编译选项
     ./configure \
-        --prefix=$PYTHON_PREFIX \
-        --enable-optimizations \
-        --enable-shared \
-        --with-ssl \
-        --with-ensurepip=upgrade \
-        --enable-loadable-sqlite-extensions && \
+    --prefix=$PYTHON_PREFIX \
+    --enable-optimizations \
+    --enable-shared \
+    --with-ssl \
+    --with-ensurepip=upgrade \
+    --enable-loadable-sqlite-extensions && \
     # 编译和安装
     make -j$(nproc) && \
     make altinstall && \
@@ -75,30 +86,39 @@ RUN cd /tmp && \
     # 清理临时文件
     cd / && rm -rf /tmp/Python-3.5.10*
 
-# 验证Python安装
+# 验证Python和Node.js安装
 RUN python --version && \
-    pip --version
+    pip --version && \
+    node --version && \
+    npm --version
 
-# 升级pip到兼容版本（Python 3.5兼容）
-RUN pip install --upgrade "pip>=9.0.1,<21.3"
 
 # 设置工作目录
 WORKDIR /workspaces/server
 
-# 复制requirements文件
-# COPY requirements.txt .
+# 复制requirements文件（可选）
+COPY requirements.txt .
 
-# 安装Python依赖
+# 安装基础Python依赖（注释掉完整安装，避免版本冲突）
 # RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制项目文件
 COPY . .
 
-# 安装包到开发模式
+# 安装基础Python包（Ubuntu 20.04兼容版本）
+RUN pip install --no-cache-dir \
+    numpy==1.19.5 \
+    pandas==1.1.5 \
+    matplotlib==3.3.4
+
+# 安装包到开发模式（注释掉，避免依赖冲突）
 # RUN pip install -e .
 
 # 设置Python路径
 ENV PYTHONPATH=/workspaces/server
+
+# 重置DEBIAN_FRONTEND以便容器运行时可以使用交互式命令
+ENV DEBIAN_FRONTEND=
 
 # 设置默认shell为bash
 SHELL ["/bin/bash", "-c"]
