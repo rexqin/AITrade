@@ -1,0 +1,44 @@
+# Backtrader - Python Backtesting Library
+# Core package (self-contained, no external dependencies required)
+# backtrader>=1.9.78
+
+# Optional plotting dependencies
+matplotlib>=1.4.1
+
+# Optional data processing dependencies
+pandas>=0.18.0
+
+# Optional portfolio analysis dependencies
+pyfolio>=0.9.0
+
+# Optional technical analysis dependencies
+# Note: TA-Lib requires system installation first
+TA-Lib>=0.4.19
+
+# Optional broker integrations
+# Interactive Brokers (requires IbPy)
+# git+https://github.com/blampe/IbPy.git
+
+# OANDA (requires oandapyV20)
+oandapyV20>=0.6.3
+
+# Optional timezone support
+pytz>=2017.2
+
+# Optional data source dependencies
+requests>=2.18.0
+PyYAML>=3.12
+
+# Development and testing dependencies (optional)
+pytest>=3.0.0
+pytest-cov>=2.5.0
+
+# Note: This requirements.txt includes optional dependencies
+# For minimal installation, only install backtrader:
+# pip install backtrader
+# 
+# For plotting support:
+# pip install backtrader[plotting]
+# 
+# For full functionality with all optional features:
+# pip install -r requirements.txt
